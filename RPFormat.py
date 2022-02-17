@@ -1,18 +1,29 @@
 import sys
 from datetime import datetime
+import os
+
+wowdir = " "
 
 
-# wowdir = " "
 
-# with open("config.txt", "r+") as configFile:
-#     lines =  configFile.readlines()
-#     for line in lines:
-#         if (line.split(' ', 1)[0]) == "wowdir":
-#             rest, wowdir = line.split(' ', 1)
-#             print(wowdir)
-#     if wowdir == " ":
-#         wowdir = input("Please input your world of warcraft directory:")
-#     configFile.writelines("wowdir " + wowdir)
+with open("config.txt", "r+") as configFile:
+    lines = configFile.read().splitlines()
+    wowdir = lines[0]
+    savedir = lines[1]
+    print(wowdir)
+    print(savedir)
+    if wowdir == "":
+        wowdir = input("Please input your world of warcraft directory:")
+        if wowdir[-1] == '/':
+            wowdir = wowdir + "_retail_/Logs"
+        else:
+            wowdir = wowdir + "/_retail_/Logs"
+        print(wowdir, file=configFile)
+    if savedir == "":
+        savedir = input("Please input your RP log directory:")
+        print(savedir, file=configFile)
+
+print(os.path.join(wowdir, "WoWChatLog.txt"))
 
 def extractData(channel, line):
     if channel == 's':
@@ -71,9 +82,11 @@ wantedRPDateEnd = datetime.strptime(wantedRPDateEnd, "%d/%m").date()
 wantedRPStart = datetime.strptime(wantedRPStart, "%X").time()
 wantedRPEnd = datetime.strptime(wantedRPEnd, "%X").time()
 
-with open("WoWChatLog.txt") as input:
+with open(wowdir + "/WoWChatLog.txt") as input:
     emote = ""
     lastMessageAuthor = ""
+    path = "-".join(players) + "_" + wantedRPDateStart.strftime("%d.%m.%y") + "_" + wantedRPStart.strftime("%X")
+    output = open(path, "w+")
     for line in input:
         data = extractData(channel, line)
         if data != []:
@@ -84,32 +97,8 @@ with open("WoWChatLog.txt") as input:
                 emote = emote + data[3]
                 lastMessageAuthor = data[2]
             else:
-                output.write(emote)
+                output.write("\n" + emote)
                 emote = data[3]
                 lastMessageAuthor = data[2]
-    path = "-".join(players) + "_" + wantedRPDateStart.strftime("%d\%m") + "_" + wantedRPStart.strftime("%X")
-    output = open(path, "w+")
     output.write(emote)
     output.close()
-#     open(sys.argv[1]) as input:
-
-#     lastWriter = ''
-#     lastEmote = ''
-#     block = ''
-#     for line in input:
-#         start = line.find('[')+1
-#         end = line.find(']')
-#         emoteStart = line.find(': ')
-#         if 'To' in line[:emoteStart]:
-#             currentWriter = 'self'
-#         else:
-#             currentWriter = line[start:end]
-#         emote = line[emoteStart+2:].rstrip()
-#         if lastWriter == currentWriter:
-#             block = block+emote
-#         else:
-#             output.write(block)
-#             block = '\n\n' + emote
-#         lastWriter = currentWriter
-        
-    

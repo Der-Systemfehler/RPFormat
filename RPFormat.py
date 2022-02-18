@@ -10,8 +10,6 @@ with open("config.txt", "r+") as configFile:
     lines = configFile.read().splitlines()
     wowdir = lines[0]
     savedir = lines[1]
-    print(wowdir)
-    print(savedir)
     if wowdir == "":
         wowdir = input("Please input your world of warcraft directory:")
         if wowdir[-1] == '/':
@@ -22,8 +20,6 @@ with open("config.txt", "r+") as configFile:
     if savedir == "":
         savedir = input("Please input your RP log directory:")
         print(savedir, file=configFile)
-
-print(os.path.join(wowdir, "WoWChatLog.txt"))
 
 def extractData(channel, line):
     if channel == 's':
@@ -81,18 +77,21 @@ wantedRPDateStart = datetime.strptime(wantedRPDateStart, "%d/%m").date()
 wantedRPDateEnd = datetime.strptime(wantedRPDateEnd, "%d/%m").date()
 wantedRPStart = datetime.strptime(wantedRPStart, "%X").time()
 wantedRPEnd = datetime.strptime(wantedRPEnd, "%X").time()
+wantedDateTimeStart = datetime.combine(wantedRPDateStart, wantedRPStart)
+wantedDateTimeEnd = datetime.combine(wantedRPDateEnd, wantedRPEnd)
 
 with open(wowdir + "/WoWChatLog.txt") as input:
     emote = ""
     lastMessageAuthor = ""
-    path = "-".join(players) + "_" + wantedRPDateStart.strftime("%d.%m.%y") + "_" + wantedRPStart.strftime("%X")
+    path = savedir + "/" + "-".join(players) + "_" + wantedRPDateStart.strftime("%d.%m.%y") + "_" + wantedRPStart.strftime("%X")
     output = open(path, "w+")
     for line in input:
         data = extractData(channel, line)
         if data != []:
             emoteDate = datetime.strptime(data[0],"%m/%d").date()
             emoteTime = datetime.strptime(data[1].rsplit('.',1)[0],"%X").time()
-        if data != [] and wantedRPDateStart <= emoteDate and wantedRPDateEnd >= emoteDate and emoteTime >= wantedRPStart and emoteTime <= wantedRPEnd and data[2].split('-')[0] in players:
+            emoteDateTime = datetime.combine(emoteDate, emoteTime)
+        if data != [] and wantedDateTimeStart < emoteDateTime and wantedDateTimeEnd > emoteDateTime and data[2].split('-')[0] in players:
             if lastMessageAuthor == data[2] or lastMessageAuthor == "":
                 emote = emote + data[3]
                 lastMessageAuthor = data[2]
